@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>ros-lm</name>
+  <name>ros_lm</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="jemonra@uma.es">ubuntu</maintainer>
-  <license>TODO: License declaration</license>
+  <description>ROS 2 Package for Interacting with Open Large [Vision-]Language Models</description>
+  <maintainer email="jemonra@uma.es">Jesús Moncada Ramírez</maintainer>
+  <license>Apache 2.0 License</license>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
@@ -15,4 +15,6 @@
   <export>
     <build_type>ament_python</build_type>
   </export>
+
+  <depend>rclpy</depend>
 </package>
