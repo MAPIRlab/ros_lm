@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'ros_lm'
+package_name = 'ros-lm'
 
 setup(
     name=package_name,
@@ -13,14 +13,13 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='Jesús Moncada Ramírez',
+    maintainer='ubuntu',
     maintainer_email='jemonra@uma.es',
-    description='ROS 2 Package for Interacting with Open Large [Vision-]Language Models',
-    license='Apache License 2.0',
+    description='TODO: Package description',
+    license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'action_server = ros_lm.action_server:main'
         ],
     },
 )
