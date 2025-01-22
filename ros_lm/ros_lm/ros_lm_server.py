@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.action import ActionServer, GoalResponse
 from rclpy.node import Node
-from transformers import pipeline
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
 
 from ros_lm_interfaces.action import LLMGenerateText
@@ -25,7 +25,14 @@ class RosLMActionServer(Node):
             self.execute_callback,
             goal_callback=self.goal_callback)
         
+        self.loaded_tokenizers = dict()
         self.loaded_models = dict()
+
+    def is_model_loaded(self, model_id: str):
+        return model_id in self.loaded_models and model_id in self.loaded_tokenizers
+    
+    def get_tokenizer_and_model(self, model_id: str):
+        return self.loaded_tokenizers[model_id], self.loaded_models[model_id]
 
     def goal_callback(self, goal_request):
         
@@ -40,12 +47,12 @@ class RosLMActionServer(Node):
             return GoalResponse.REJECT
         
         # load model already loaded
-        if goal_request.action == self.ACTION_LOAD_LLM and goal_request.model_id in self.loaded_models:
+        if goal_request.action == self.ACTION_LOAD_LLM and self.is_model_loaded(goal_request.model_id):
             self.get_logger().debug(f"Goal rejected because model {goal_request.model_id} is already loaded")
             return GoalResponse.REJECT
         
         # generate text for model not loaded
-        if goal_request.action == self.ACTION_GENERATE_TEXT and goal_request.model_id not in self.loaded_models:
+        if goal_request.action == self.ACTION_GENERATE_TEXT and not self.is_model_loaded(goal_request.model_id):
             self.get_logger().debug(f"Goal rejected because model {goal_request.model_id} is not loaded")
             return GoalResponse.REJECT
         
@@ -65,7 +72,7 @@ class RosLMActionServer(Node):
             self.get_logger().info(f"Executing action = {self.ACTION_LOAD_LLM} (load LLM) model_id = {goal_handle.request.model_id}...")
 
             # Load LLM model
-            ok = self.load_model(request_model_id)
+            ok = self.load_model_and_tokenizer(request_model_id)
             if not ok:
                 return
         
@@ -83,16 +90,47 @@ class RosLMActionServer(Node):
 
         return result
 
-    def load_model(self, model_id: str):
+    def load_model_and_tokenizer(self, model_id: str):
         try:
-            pipe = pipeline("text-generation", model=model_id)
-            self.loaded_models[model_id] = pipe
-            self.get_logger().info(f"Model {model_id} successfully loaded!")
+            # Load tokenizer and model
+            tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
+            model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", device_map="auto")
+
+            # Save tokenizer and model
+            self.loaded_tokenizers[model_id] = tokenizer
+            self.loaded_models[model_id] = model
+
+            self.get_logger().info(f"Model {model_id} and tokenizer successfully loaded!")
             return True
         except OSError:
             return False
+        
+    def generate_text(self, model_id: str, prompt: str):
+        
+        # Get tokenizer and model
+        tokenizer, model = self.get_tokenizer_and_model(model_id)
+
+        # Tokenize
+        inputs = tokenizer(prompt, return_tensors="pt")
+
+        # Generate text
+        output = model.generate(
+            inputs.input_ids, 
+            max_length=200,
+            num_return_sequences=1,
+            temperature=0.7,
+            top_k=50,
+            top_p=0.9,
+            do_sample=True
+        )
+
+        # De-tokenize
+        response = tokenizer.decode(output[0], skip_special_tokens=True)
+        self.get_logger().debug(f"Model {model_id} generated text: {response}")
+        return response
 
 def main(args=None):
+    
     rclpy.init(args=args)
 
     ros_lm_action_server = RosLMActionServer()
