@@ -2,4 +2,6 @@ int32 action
 string model_id
 string prompt
 ---
-string response
+int32 status_code
+string status_message
+string generated_text
