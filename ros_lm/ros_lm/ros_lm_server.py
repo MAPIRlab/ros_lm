@@ -1,29 +1,26 @@
 import rclpy
-from rclpy.action import ActionServer, GoalResponse
 from rclpy.node import Node
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
+from ros_lm_interfaces.srv import OpenLLMRequest
 
-from ros_lm_interfaces.action import LLMGenerateText
+class RosLMServiceServer(Node):
 
-class RosLMActionServer(Node):
-
-    # Available action types
+    # Available service action types
     ACTION_LOAD_LLM = 1
     ACTION_GENERATE_TEXT = 2
 
     # Model Ids List
     MODEL_LLAMA_2_7B_CHAT = "meta-llama/Llama-2-7b-chat-hf"
-    MODEL_IDS = (MODEL_LLAMA_2_7B_CHAT)
+    MODEL_IDS = (MODEL_LLAMA_2_7B_CHAT,)
 
     def __init__(self):
-        super().__init__('ros_lm_action_server')
-        self._action_server = ActionServer(
-            self,
-            LLMGenerateText,
+        super().__init__('ros_lm_service_server')
+        self._service = self.create_service(
+            OpenLLMRequest,
             'llm_generate_text',
-            self.execute_callback,
-            goal_callback=self.goal_callback)
+            self.service_callback
+        )
         
         self.loaded_tokenizers = dict()
         self.loaded_models = dict()
@@ -34,86 +31,71 @@ class RosLMActionServer(Node):
     def get_tokenizer_and_model(self, model_id: str):
         return self.loaded_tokenizers[model_id], self.loaded_models[model_id]
 
-    def goal_callback(self, goal_request):
+    def service_callback(self, request, response):
         
-        # action does not exist
-        if goal_request.action not in (self.ACTION_LOAD_LLM, self.ACTION_GENERATE_TEXT):
-            self.get_logger().debug(f"Goal rejected because action {goal_request.action} is not supported")
-            return GoalResponse.REJECT
+        # Validate requested action
+        if request.action not in (self.ACTION_LOAD_LLM, self.ACTION_GENERATE_TEXT):
+            self.get_logger().error(f"Service request rejected: action {request.action} is not supported")
+            response.response = "Error: Unsupported action."
+            return response
 
-        # model_id does not exist
-        if goal_request.model_id not in self.MODEL_IDS:
-            self.get_logger().debug(f"Goal rejected because model_id {goal_request.model_id} is not supported")
-            return GoalResponse.REJECT
+        # Validate model ID
+        if request.model_id not in self.MODEL_IDS:
+            self.get_logger().error(f"Service request rejected: model_id {request.model_id} is not supported")
+            response.response = "Error: Unsupported model ID."
+            return response
         
-        # load model already loaded
-        if goal_request.action == self.ACTION_LOAD_LLM and self.is_model_loaded(goal_request.model_id):
-            self.get_logger().debug(f"Goal rejected because model {goal_request.model_id} is already loaded")
-            return GoalResponse.REJECT
+        # Check if model is already loaded for loading requests
+        if request.action == self.ACTION_LOAD_LLM and self.is_model_loaded(request.model_id):
+            self.get_logger().info(f"Model {request.model_id} is already loaded")
+            response.response = f"Model {request.model_id} is already loaded."
+            return response
         
-        # generate text for model not loaded
-        if goal_request.action == self.ACTION_GENERATE_TEXT and not self.is_model_loaded(goal_request.model_id):
-            self.get_logger().debug(f"Goal rejected because model {goal_request.model_id} is not loaded")
-            return GoalResponse.REJECT
+        # Check if model is not loaded for text generation requests
+        if request.action == self.ACTION_GENERATE_TEXT and not self.is_model_loaded(request.model_id):
+            self.get_logger().error(f"Service request rejected: model {request.model_id} is not loaded")
+            response.response = "Error: Model is not loaded."
+            return response
         
-        return GoalResponse.ACCEPT
-
-    def execute_callback(self, goal_handle):
-
-        # Get request fields
-        request_action = goal_handle.request.action
-        request_model_id = goal_handle.request.model_id
-        request_prompt = goal_handle.request.prompt
-
-        # Build result
-        result = LLMGenerateText.Result() 
-
-        if request_action == self.ACTION_LOAD_LLM:
-            self.get_logger().info(f"Executing action = {self.ACTION_LOAD_LLM} (load LLM) model_id = {goal_handle.request.model_id}...")
-
-            # Load LLM model
-            ok = self.load_model_and_tokenizer(request_model_id)
-            if not ok:
-                return
+        # Execute the requested action
+        if request.action == self.ACTION_LOAD_LLM:
+            self.get_logger().info(f"Loading model {request.model_id}...")
+            if self.load_model_and_tokenizer(request.model_id):
+                response.response = f"Model {request.model_id} successfully loaded."
+            else:
+                response.response = f"Failed to load model {request.model_id}."
         
-        elif request_action == self.ACTION_GENERATE_TEXT:
-            self.get_logger().info(f"Executing action = {self.ACTION_GENERATE_TEXT} (generate text) model_id = {goal_handle.request.model_id}...")
-            
-            # Generate text
-            messages = [{"role": "user", "content": request_prompt}]
-            result.response = self.loaded_models[request_model_id](messages)
+        elif request.action == self.ACTION_GENERATE_TEXT:
+            self.get_logger().info(f"Generating text using model {request.model_id}...")
+            response.response = self.generate_text(request.model_id, request.prompt)
 
-        else:
-            self.get_logger().error(f"Invalid action = {goal_handle.request.action} requested.")
-
-        goal_handle.succeed()
-
-        return result
+        return response
 
     def load_model_and_tokenizer(self, model_id: str):
         try:
             # Load tokenizer and model
-            tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
-            model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", device_map="auto")
+            tokenizer = AutoTokenizer.from_pretrained(model_id)
+            model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto")
 
-            # Save tokenizer and model
+            # Store tokenizer and model
             self.loaded_tokenizers[model_id] = tokenizer
             self.loaded_models[model_id] = model
 
-            self.get_logger().info(f"Model {model_id} and tokenizer successfully loaded!")
+            self.get_logger().info(f"Model {model_id} and tokenizer successfully loaded.")
             return True
-        except OSError:
+        except OSError as e:
+            self.get_logger().error(f"Error loading model {model_id}: {e}")
             return False
         
     def generate_text(self, model_id: str, prompt: str):
         
-        # Get tokenizer and model
+        # Retrieve tokenizer and model
         tokenizer, model = self.get_tokenizer_and_model(model_id)
 
-        # Tokenize
+        # Tokenize input
         inputs = tokenizer(prompt, return_tensors="pt")
 
-        # Generate text
+        # Generate text output
         output = model.generate(
             inputs.input_ids, 
             max_length=200,
@@ -124,18 +106,17 @@ class RosLMActionServer(Node):
             do_sample=True
         )
 
-        # De-tokenize
-        response = tokenizer.decode(output[0], skip_special_tokens=True)
-        self.get_logger().debug(f"Model {model_id} generated text: {response}")
-        return response
+        # Decode generated text
+        response_text = tokenizer.decode(output[0], skip_special_tokens=True)
+        self.get_logger().info(f"Generated text: {response_text}")
+        return response_text
+
 
 def main(args=None):
-    
     rclpy.init(args=args)
+    ros_lm_service_server = RosLMServiceServer()
+    rclpy.spin(ros_lm_service_server)
 
-    ros_lm_action_server = RosLMActionServer()
-
-    rclpy.spin(ros_lm_action_server)
 
 if __name__ == '__main__':
     main()

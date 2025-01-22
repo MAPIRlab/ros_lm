@@ -1,0 +1,5 @@
+int32 action
+string model_id
+string prompt
+---
+string response
