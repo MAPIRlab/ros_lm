@@ -9,6 +9,8 @@ prompt = "Once upon a time in a distant kingdom, there was a"
 # Tokenize the input prompt
 inputs = tokenizer(prompt, return_tensors="pt")
 
+print(inputs)
+
 # Generate text
 output = model.generate(
     inputs.input_ids, 
