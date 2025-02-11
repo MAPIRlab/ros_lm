@@ -43,7 +43,13 @@ class RosLMServiceServer(Node):
         
         elif request.action == ACTION_GENERATE_TEXT:
             self.get_logger().info(f"Generating text using model {request.model_id}...")
-            generated_text = self.generate_text(request.model_id, request.prompt, request)
+            params = {
+                "max_length": request.max_length,
+                "temperature": request.temperature,
+                "top_k": request.top_k,
+                "top_p": request.top_p
+            }
+            generated_text = self.generate_text(request.model_id, request.prompt, params)
             response.status_code = 1
             response.status_message = "Text generated successfully."
             response.generated_text = generated_text
@@ -118,6 +124,9 @@ def main(args=None):
     rclpy.init(args=args)
     ros_lm_service_server = RosLMServiceServer()
     rclpy.spin(ros_lm_service_server)
+
+    ros_lm_service_server.destroy_node()
+    rclpy.shutdown()
 
 
 if __name__ == '__main__':

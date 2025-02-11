@@ -6,9 +6,9 @@ string model_id
 string prompt
 
 # Aditional model configuration
-int32 max_length 200
+uint32 max_length 200
 float32 temperature 0.7
-float32 top_k 50
+uint32 top_k 50
 float32 top_p 0.9
 ---
 # Response fields
