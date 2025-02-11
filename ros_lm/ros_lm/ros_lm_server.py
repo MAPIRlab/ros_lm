@@ -42,9 +42,14 @@ class RosLMServiceServer(Node):
                 response.generated_text = ""
         
         elif request.action == ACTION_GENERATE_TEXT:
-            
             self.get_logger().info(f"Generating text using model {request.model_id}...")
-            generated_text = self.generate_text(request.model_id, request.prompt)
+            params = {
+                "max_length": request.max_length,
+                "temperature": request.temperature,
+                "top_k": request.top_k,
+                "top_p": request.top_p
+            }
+            generated_text = self.generate_text(request.model_id, request.prompt, params)
             response.status_code = 1
             response.status_message = "Text generated successfully."
             response.generated_text = generated_text
@@ -90,7 +95,7 @@ class RosLMServiceServer(Node):
     def get_tokenizer_and_model(self, model_id: str):
         return self.loaded_tokenizers[model_id], self.loaded_models[model_id]
 
-    def generate_text(self, model_id: str, prompt: str):
+    def generate_text(self, model_id: str, prompt: str, parameters: dict):
         
         # Retrieve tokenizer and model
         tokenizer, model = self.get_tokenizer_and_model(model_id)
@@ -101,11 +106,11 @@ class RosLMServiceServer(Node):
         # Generate text output
         output = model.generate(
             inputs.input_ids, 
-            max_length=200,
+            max_length=parameters['max_length'],
             num_return_sequences=1,
-            temperature=0.7,
-            top_k=50,
-            top_p=0.9,
+            temperature=parameters['temperature'],
+            top_k=parameters['top_k'],
+            top_p=parameters['top_p'],
             do_sample=True
         )
 
@@ -119,6 +124,9 @@ def main(args=None):
     rclpy.init(args=args)
     ros_lm_service_server = RosLMServiceServer()
     rclpy.spin(ros_lm_service_server)
+
+    ros_lm_service_server.destroy_node()
+    rclpy.shutdown()
 
 
 if __name__ == '__main__':

@@ -1,6 +1,4 @@
-
-
-import constants
+from . import constants
 
 
 class RequestValidator:
@@ -20,7 +18,7 @@ class RequestValidator:
 
     def validate(self):
         # Validate requested action
-        if self.request.action not in (constants.ACTION_LOAD_LLM, constants.ACTION_GENERATE_TEXT, constants.ACTION_UNLOAD_LLM):
+        if self.request.action not in [constants.ACTION_LOAD_LLM, constants.ACTION_GENERATE_TEXT, constants.ACTION_UNLOAD_LLM]:
             self.logger.error(f"Service request rejected: action {self.request.action} is not supported")
             self.error_response.status_code = constants.STATUS_CODE_ERROR
             self.error_response.status_message = "Error: Unsupported action."
@@ -44,7 +42,7 @@ class RequestValidator:
             return False
         
         # Check if model is not loaded for ACTION_GENERATE_TEXT and ACTION_UNLOAD_LLM
-        if self.request.action in (self.ACTION_GENERATE_TEXT, self.ACTION_UNLOAD_LLM) and not self.is_model_loaded(self.request.model_id):
+        if self.request.action in [constants.ACTION_GENERATE_TEXT, constants.ACTION_UNLOAD_LLM] and not self.is_model_loaded(self.request.model_id):
             self.logger.error(f"Service request rejected: model {self.request.model_id} is not loaded")
             self.error_response.status_code = constants.STATUS_CODE_ERROR
             self.self.response.status_message = "Error: Model is not loaded."
