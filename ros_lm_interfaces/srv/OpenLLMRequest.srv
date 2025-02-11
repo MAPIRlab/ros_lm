@@ -1,6 +1,7 @@
 int32 action
 string model_id
 string prompt
+sensor_msgs/Image[] images
 ---
 int32 status_code
 string status_message

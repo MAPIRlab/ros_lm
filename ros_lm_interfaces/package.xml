@@ -19,4 +19,7 @@
   <buildtool_depend>rosidl_default_generators</buildtool_depend>
   <exec_depend>rosidl_default_runtime</exec_depend>
   <member_of_group>rosidl_interface_packages</member_of_group>
+  
+  <!-- To use sensor_msgs/msg/Image[] in service requests-->
+  <depend>sensor_msgs</depend>
 </package>

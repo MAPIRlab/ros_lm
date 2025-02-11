@@ -24,10 +24,11 @@ if(BUILD_TESTING)
 endif()
 
 find_package(rosidl_default_generators REQUIRED)
+find_package(sensor_msgs REQUIRED) # To use sensor_msgs/msg/Image[] in service requests
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "action/LLMGenerateText.action"
   "srv/OpenLLMRequest.srv"
+  DEPENDENCIES sensor_msgs
 )
 
 ament_package()
