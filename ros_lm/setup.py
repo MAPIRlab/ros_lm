@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'server = ros_lm.ros_lm_server:main'
+            'server = ros_lm.ros_lm_server:main',
+            'sample_client = ros_lm.ros_lm_sample_client:main'
         ],
     },
 )

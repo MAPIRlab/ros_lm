@@ -46,9 +46,14 @@ class RosLMServiceServer(Node):
                 response.generated_text = ""
         
         elif request.action == ACTION_GENERATE_TEXT:
-            
             self.get_logger().info(f"Generating text using model {request.model_id}...")
-            generated_text = self.generate_text(request.model_id, request.prompt, request.images)
+            params = {
+                "max_length": request.max_length,
+                "temperature": request.temperature,
+                "top_k": request.top_k,
+                "top_p": request.top_p
+            }
+            generated_text = self.generate_text(request.model_id, request.prompt, params)
             response.status_code = 1
             response.status_message = "Text generated successfully."
             response.generated_text = generated_text
