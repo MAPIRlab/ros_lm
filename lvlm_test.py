@@ -20,6 +20,7 @@ image2 = Image.open(requests.get("http://images.cocodataset.org/val2017/00000003
 
 prompt1 = "USER: <image>\nWhat is this image?\nASSISTANT:"
 prompt2 = "USER: <image>\nPlease describe this image\nASSISTANT:"
+prompt3 = "How are you?"
 
 inputs = processor(text=prompt1, images=image1, padding=True, return_tensors="pt").to("cuda")
 

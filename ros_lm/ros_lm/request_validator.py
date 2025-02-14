@@ -48,7 +48,7 @@ class RequestValidator:
         if self.request.action in [constants.ACTION_GENERATE_TEXT, constants.ACTION_UNLOAD_LLM] and not self.is_model_loaded(self.request.model_id):
             self.logger.error(f"Service request rejected: model {self.request.model_id} is not loaded")
             self.error_response.status_code = constants.STATUS_CODE_ERROR
-            self.self.response.status_message = "Error: Model is not loaded."
+            self.error_response.status_message = "Error: Model is not loaded."
             self.error_response.generated_text = ""
             return False
         
