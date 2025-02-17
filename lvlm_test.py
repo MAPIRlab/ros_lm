@@ -20,6 +20,7 @@ image2 = Image.open(requests.get("http://images.cocodataset.org/val2017/00000003
 
 prompt1 = "USER: <image>\nWhat is this image?\nASSISTANT:"
 prompt2 = "USER: <image>\nPlease describe this image\nASSISTANT:"
+prompt3 = "How are you?"
 
 inputs = processor(text=prompt1, images=image1, padding=True, return_tensors="pt").to("cuda")
 
@@ -28,5 +29,6 @@ for k,v in inputs.items():
 
 output = model.generate(**inputs, max_new_tokens=200)
 generated_text = processor.batch_decode(output, skip_special_tokens=True)
+print('generated_text', generated_text)
 for text in generated_text:
     print(text.split("ASSISTANT:")[-1])
