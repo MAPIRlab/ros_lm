@@ -29,5 +29,6 @@ for k,v in inputs.items():
 
 output = model.generate(**inputs, max_new_tokens=200)
 generated_text = processor.batch_decode(output, skip_special_tokens=True)
+print('generated_text', generated_text)
 for text in generated_text:
     print(text.split("ASSISTANT:")[-1])

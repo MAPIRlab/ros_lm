@@ -89,7 +89,7 @@ class RosLMServiceServer(Node):
         """Loads the specified model into memory."""
         if ModelDatabase.is_llm(model_id):
             result, model = LargeLanguageModel.create(model_id)
-        elif ModelDatabase.is_vlm(model_id):  # Fixed duplicated condition
+        elif ModelDatabase.is_lvlm(model_id):
             result, model = LargeVisionLanguageModel.create(model_id)
 
         if result:

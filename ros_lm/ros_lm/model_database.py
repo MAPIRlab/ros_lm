@@ -14,10 +14,18 @@ class ModelDatabase:
     @staticmethod
     def is_llm(model_id):
         return model_id in ModelDatabase.MODEL_LIST and ModelDatabase.MODEL_LIST[model_id] == ModelDatabase.TYPE_LLM
+    
+    @staticmethod
+    def get_llms():
+        return list(filter(lambda model_id : ModelDatabase.is_llm(model_id), ModelDatabase.MODEL_LIST.keys()))
 
     @staticmethod
     def is_lvlm(model_id):
         return model_id in ModelDatabase.MODEL_LIST and ModelDatabase.MODEL_LIST[model_id] == ModelDatabase.TYPE_LVLM
+    
+    @staticmethod
+    def get_lvlms():
+        return list(filter(lambda model_id : ModelDatabase.is_lvlm(model_id), ModelDatabase.MODEL_LIST.keys()))
     
     @staticmethod
     def exists(model_id):

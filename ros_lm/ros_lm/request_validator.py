@@ -1,5 +1,6 @@
 
 
+from .response_utils import ResponseUtils
 from . import constants
 from .model_database import ModelDatabase
 
@@ -34,7 +35,7 @@ class RequestValidator:
         
         # Check if model is already loaded for ACTION_LOAD_LLM
         if self.request.action == constants.ACTION_LOAD_LLM and self.is_model_loaded(self.request.model_id):
-            self.logger.info(f"Model {self.request.model_id} is already loaded")
+            self.logger.info(f"Service request rejected: model {self.request.model_id} is already loaded")
             self.error_response.status_code = constants.STATUS_CODE_ERROR
             self.error_response.status_message = f"Model {self.request.model_id} is already loaded."
             self.error_response.generated_text = ""
@@ -48,6 +49,14 @@ class RequestValidator:
             self.error_response.generated_text = ""
             return False
         
+        # Check if model is LVLM and request.images is empty
+        if self.request.action == constants.ACTION_GENERATE_TEXT and ModelDatabase.is_lvlm(self.request.model_id) and len(self.request.images) == 0:
+            self.logger.error(f"Service request rejected: model {self.request.model_id} is a LVLM and no images were included")
+            self.error_response = ResponseUtils.create_response(self.error_response,
+                                                                status_code=constants.STATUS_CODE_ERROR,
+                                                                status_message="Error: Model is LVLM and no images were included in the request.")
+            return False
+
         return True
 
     def get_error_response(self):

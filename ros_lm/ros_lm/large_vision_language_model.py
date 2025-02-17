@@ -21,16 +21,16 @@ class LargeVisionLanguageModel(LanguageModel):
     def generate_text(self, prompt, params):
         return super().generate_text(prompt, params)
 
-    def generate_text_with_images(self, prompt: str, images: list[str]):
+    def generate_text_with_images(self, prompt: str, images: list[str], params: dict):
         """Generates text based on a text prompt and input images."""
         inputs = self.processor(
             text=prompt, 
-            images=map(self.base64_to_PIL, images), 
+            images=list(map(self.base64_to_PIL, images)), 
             padding=True, 
             return_tensors="pt"
         )
         output = self._model.generate(**inputs, max_new_tokens=200)
-        return self.processor.batch_decode(output, skip_special_tokens=True).join(" ")
+        return self.processor.batch_decode(output, skip_special_tokens=True)[-1]
 
     def base64_to_PIL(self, image_b64: str) -> list[Image.Image]:
         """Converts base64-encoded images to PIL images."""
