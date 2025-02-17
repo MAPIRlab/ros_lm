@@ -15,6 +15,10 @@ class ModelDatabase:
     def is_llm(model_id):
         return model_id in ModelDatabase.MODEL_LIST and ModelDatabase.MODEL_LIST[model_id] == ModelDatabase.TYPE_LLM
 
-    staticmethod
+    @staticmethod
     def is_lvlm(model_id):
         return model_id in ModelDatabase.MODEL_LIST and ModelDatabase.MODEL_LIST[model_id] == ModelDatabase.TYPE_LVLM
+    
+    @staticmethod
+    def exists(model_id):
+        return model_id in ModelDatabase.MODEL_LIST

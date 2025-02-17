@@ -1,25 +1,21 @@
 
 
 from . import constants
+from .model_database import ModelDatabase
 
 class RequestValidator:
 
-    def __init__(self, logger, request, response, loaded_models, loaded_tokenizers):
+    def __init__(self, logger, request, response, loaded_models):
         self.logger = logger
         self.request = request
         self.error_response = response
         self.loaded_models = loaded_models
-        self.loaded_tokenizers = loaded_tokenizers
 
     def is_model_loaded(self, model_id: str):
-        return model_id in self.loaded_models and model_id in self.loaded_tokenizers
-    
-    def get_tokenizer_and_model(self, model_id: str):
-        return self.loaded_tokenizers[model_id], self.loaded_models[model_id]
+        return model_id in self.loaded_models
 
     def validate(self):
         
-
         # Validate requested action
         if self.request.action not in [constants.ACTION_LOAD_LLM, constants.ACTION_GENERATE_TEXT, constants.ACTION_UNLOAD_LLM]:
             self.logger.error(f"Service request rejected: action {self.request.action} is not supported")
@@ -29,7 +25,7 @@ class RequestValidator:
             return False
 
         # Validate model ID
-        if self.request.model_id not in constants.MODEL_LIST:
+        if not ModelDatabase.exists(self.request.model_id):
             self.logger.error(f"Service request rejected: model_id {self.request.model_id} is not supported")
             self.error_response.status_code = constants.STATUS_CODE_ERROR
             self.error_response.status_message = "Error: Unsupported model ID."

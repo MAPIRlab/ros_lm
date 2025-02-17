@@ -12,7 +12,7 @@ uint32 top_k 50
 float32 top_p 0.9
 
 # Images for LVLMs
-sensor_msgs/Image[] images
+string[] images
 
 ---
 # Response fields
