@@ -8,6 +8,7 @@ class ModelDatabase:
     MODEL_LIST = {
         "meta-llama/Llama-3.1-8B-Instruct" : TYPE_LLM,
         "meta-llama/Llama-3.2-3B-Instruct" : TYPE_LLM,
+        "deepseek-ai/deepseek-llm-7b-chat" : TYPE_LLM,
         "llava-hf/llava-1.5-7b-hf": TYPE_LVLM
     }
 
