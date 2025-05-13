@@ -19,3 +19,10 @@ string[] images
 int32 status_code
 string status_message
 string generated_text
+
+uint8 ACTION_LOAD_MODEL     = 1
+uint8 ACTION_GENERATE_TEXT  = 2
+uint8 ACTION_UNLOAD_MODEL   = 3
+
+uint8 STATUS_CODE_ERROR     = 0
+uint8 STATUS_CODE_SUCCESS   = 1
