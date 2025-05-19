@@ -3,14 +3,15 @@ from rclpy.node import Node
 import gc
 import torch
 
-from .language_model import LanguageModel
-from .response_utils import ResponseUtils
+from ros_lm.models.language_model import LanguageModel
 
-from .model_database import ModelDatabase
-from .large_vision_language_model import LargeVisionLanguageModel
-from .large_language_model import LargeLanguageModel
-from .request_validator import RequestValidator
-from . import constants
+from ros_lm.response_utils import ResponseUtils
+
+from ros_lm.models.model_database import ModelDatabase
+from ros_lm.models.llm.lvlm.large_vision_language_model import LargeVisionLanguageModel
+from ros_lm.models.llm.large_language_model import LargeLanguageModel
+from ros_lm.request_validator import RequestValidator
+import ros_lm.constants as constants
 
 from ros_lm_interfaces.srv import OpenLLMRequest
 

@@ -1,17 +1,15 @@
-from setuptools import find_packages, setup
-
-package_name = 'ros_lm'
+from setuptools import setup, find_packages
 
 setup(
-    name=package_name,
+    name='ros_lm',
     version='0.0.0',
-    packages=find_packages(exclude=['test']),
+    packages=find_packages(),
     data_files=[
         ('share/ament_index/resource_index/packages',
-            ['resource/' + package_name]),
-        ('share/' + package_name, ['package.xml']),
+            ['resource/ros_lm']),
+        ('share/ros_lm', ['package.xml']),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'transformers', 'torch'],
     zip_safe=True,
     maintainer='ubuntu',
     maintainer_email='jemonra@uma.es',

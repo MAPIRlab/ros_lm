@@ -3,7 +3,8 @@ from io import BytesIO
 import torch
 from transformers import BitsAndBytesConfig, AutoProcessor, AutoModelForImageTextToText
 from PIL import Image
-from .language_model import LanguageModel
+from ros_lm.models.language_model import LanguageModel
+
 
 class LargeVisionLanguageModel(LanguageModel):
     """A vision-language model for generating text from images and text prompts."""
