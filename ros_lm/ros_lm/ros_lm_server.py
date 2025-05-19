@@ -13,6 +13,7 @@ from ros_lm.models.llm.large_language_model import LargeLanguageModel
 from ros_lm.request_validator import RequestValidator
 import ros_lm.constants as constants
 
+from ros_lm.factory.lvlm_factory import LVLMFactory
 from ros_lm_interfaces.srv import OpenLLMRequest
 
 
@@ -91,8 +92,7 @@ class RosLMServiceServer(Node):
         if ModelDatabase.is_llm(model_id):
             result, model = LargeLanguageModel.create(model_id)
         elif ModelDatabase.is_lvlm(model_id):
-            result, model = LargeVisionLanguageModel.create(model_id)
-
+            result, model = LVLMFactory.create_lvlm(model_id)
         if result:
             self.loaded_models[model_id] = model
         return result
