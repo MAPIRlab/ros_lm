@@ -1,4 +1,4 @@
-from .language_model import LanguageModel
+from ros_lm.models.language_model import LanguageModel
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 class LargeLanguageModel(LanguageModel):

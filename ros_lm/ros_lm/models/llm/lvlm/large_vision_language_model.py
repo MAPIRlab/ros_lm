@@ -3,7 +3,8 @@ from io import BytesIO
 import torch
 from transformers import BitsAndBytesConfig, AutoProcessor, AutoModelForImageTextToText
 from PIL import Image
-from .language_model import LanguageModel
+from ros_lm.models.language_model import LanguageModel
+
 
 class LargeVisionLanguageModel(LanguageModel):
     """A vision-language model for generating text from images and text prompts."""
@@ -31,15 +32,6 @@ class LargeVisionLanguageModel(LanguageModel):
         )
         output = self._model.generate(**inputs, max_new_tokens=200)
         return self.processor.batch_decode(output, skip_special_tokens=True)[-1]
-
-    def base64_to_PIL(self, image_b64: str) -> list[Image.Image]:
-        """Converts base64-encoded images to PIL images."""
-        try:
-            img_data = base64.b64decode(image_b64)
-            img = Image.open(BytesIO(img_data))
-            return img
-        except Exception as e:
-            print(f"Error decoding image: {e}")
 
     @staticmethod
     def create(model_id: str):

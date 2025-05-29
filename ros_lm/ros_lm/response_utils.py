@@ -1,5 +1,5 @@
 
-from . import constants
+import ros_lm.constants as constants
 
 
 class ResponseUtils:

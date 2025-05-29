@@ -2,9 +2,9 @@ import random
 from rclpy.node import Node
 import rclpy
 from threading import Thread
-from .model_database import ModelDatabase
+from ros_lm.models.model_database import ModelDatabase
 from ros_lm_interfaces.srv import OpenLLMRequest
-from .constants import ACTION_GENERATE_TEXT, ACTION_LOAD_LLM, ACTION_UNLOAD_LLM, STATUS_CODE_SUCCESS, BASE64_EXAMPLE_IMAGE
+from ros_lm.constants import ACTION_GENERATE_TEXT, ACTION_LOAD_LLM, ACTION_UNLOAD_LLM, STATUS_CODE_SUCCESS, BASE64_EXAMPLE_IMAGE
 
 class SampleROSLMServiceClient(Node):
 
